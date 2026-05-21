@@ -46,57 +46,96 @@ body{display:flex;height:100vh;height:100dvh;overflow:hidden;background:#0a0a0a;
   padding-right:env(safe-area-inset-right);
 }
 
+/* ── BOTÃO HAMBURGUER & OVERLAY ─────────────────────────── */
+#menu-toggle{
+  display:none;position:fixed;bottom:20px;right:20px;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--red);border:none;color:#fff;
+  font-size:22px;cursor:pointer;z-index:1000;
+  box-shadow:0 4px 18px rgba(227,39,38,.55);
+  align-items:center;justify-content:center;
+  transition:transform .2s,box-shadow .2s;
+}
+#menu-toggle:active{transform:scale(.92)}
+#sb-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(3px);
+  z-index:998;opacity:0;transition:opacity .3s;
+}
+#sb-overlay.on{opacity:1}
+
 /* ── MOBILE LAYOUT (iPhone) ─────────────────────────────── */
 @media(max-width:768px){
-  body{flex-direction:column;}
+  body{flex-direction:column;overflow:hidden;}
 
-  /* Sidebar vira painel inferior deslizável */
+  /* Botão hamburguer aparece no mobile */
+  #menu-toggle{display:flex;}
+
+  /* Sidebar vira drawer lateral deslizante da direita */
   #sb{
-    width:100%!important;min-width:100%!important;
-    height:auto;max-height:52vh;
+    position:fixed!important;
+    top:0!important;right:0!important;
+    width:88vw!important;max-width:340px!important;
+    min-width:0!important;height:100dvh!important;
     border-right:none!important;
-    border-top:1px solid var(--bd);
-    order:2;
-    border-radius:16px 16px 0 0;
+    border-left:1px solid var(--bd);
+    z-index:999;overflow:hidden;
+    transform:translateX(100%);
+    transition:transform .32s cubic-bezier(.4,0,.2,1);
+    border-radius:0!important;
+    /* Respeitar notch */
+    padding-top:max(env(safe-area-inset-top),12px)!important;
+    padding-bottom:env(safe-area-inset-bottom)!important;
   }
-  #sb-hd{display:none!important}
-  /* Canvas ocupa topo */
+  #sb.open{transform:translateX(0);}
+  #sb-overlay{display:block;}
+
+  /* Canvas ocupa toda a tela */
   #ca{
-    order:1;flex:1;
-    min-height:40vh;
+    width:100%!important;flex:1;
     padding:8px;
+    display:flex;align-items:center;justify-content:center;
   }
-  /* Story menor no mobile */
+
+  /* Story — escalonado via JS transform */
   #story{
     border-radius:6px!important;
     box-shadow:0 8px 24px rgba(0,0,0,.7)!important;
+    transform-origin:top center;
   }
+
   /* Tabs maiores para touch */
-  #tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;flex-shrink:0}
-  .tab{min-width:52px;padding:10px 4px;font-size:8px;scroll-snap-align:start;-webkit-tap-highlight-color:transparent}
-  /* Campos touch-friendly */
-  .f input[type=text],.f select{padding:8px 10px;font-size:16px} /* ≥16px previne zoom no iOS */
-  .f input[type=range]{height:6px}
-  .tog{width:36px;height:20px}
-  .tog em::after{width:14px;height:14px}
-  .tog input:checked+em::after{left:20px}
-  /* Botões maiores */
-  .expb,.fx-btn,.ael{padding:12px!important;font-size:12px!important}
-  .align-btn,.style-btn{padding:8px 4px!important;font-size:10px!important}
+  #tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;flex-shrink:0;}
+  .tab{min-width:52px;padding:10px 4px;font-size:8px;scroll-snap-align:start;-webkit-tap-highlight-color:transparent;}
+
+  /* Campos touch-friendly (≥16px previne zoom no iOS) */
+  .f input[type=text],.f select{padding:8px 10px;font-size:16px;}
+  .f input[type=range]{height:6px;}
+  .tog{width:36px;height:20px;}
+  .tog em::after{width:14px;height:14px;}
+  .tog input:checked+em::after{left:20px;}
+
+  /* Botões maiores p/ toque */
+  .expb,.fx-btn,.ael{padding:12px!important;font-size:12px!important;}
+  .align-btn,.style-btn{padding:8px 4px!important;font-size:10px!important;}
+
   /* Preview anim botão */
-  #anim-preview{top:6px;right:6px;font-size:10px;padding:6px 12px}
+  #anim-preview{top:6px;right:6px;font-size:10px;padding:6px 12px;}
+
   /* Esconder crosshair no touch */
-  #crosshair{display:none!important}
-  /* Scroll horizontal nos presets */
+  #crosshair{display:none!important;}
+
+  /* Presets em grade */
   #preset-list{display:flex;flex-wrap:wrap;gap:6px;}
 }
 
-/* iPhone 16 Pro Max específico */
-@media(max-width:440px){
-  .tab{font-size:7px;min-width:44px;padding:9px 2px}
-  #tc{padding:8px 10px 20px}
-  .f label{font-size:11px}
-  .cf label{font-size:11px}
+/* Telas muito pequenas (iPhone SE, Galaxy A14 etc.) */
+@media(max-width:430px){
+  .tab{font-size:7px;min-width:44px;padding:9px 2px;}
+  #tc{padding:8px 10px 24px;}
+  .f label{font-size:11px;}
+  .cf label{font-size:11px;}
+  #menu-toggle{width:46px;height:46px;font-size:20px;bottom:16px;right:16px;}
 }
 
 /* ── SIDEBAR ──────────────────────────────────────────────── */
@@ -246,6 +285,10 @@ body{display:flex;height:100vh;height:100dvh;overflow:hidden;background:#0a0a0a;
 <body>
 <div id="ld"><div class="sp"></div><p id="ld-txt">Aguarde...</p></div>
 <div id="toast"></div>
+<!-- Overlay p/ fechar sidebar no mobile -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+<!-- Botão hamburguer mobile -->
+<button id="menu-toggle" onclick="toggleSidebar()" aria-label="Abrir menu">&#9776;</button>
 
 <!-- SIDEBAR -->
 <div id="sb">
@@ -1922,27 +1965,87 @@ window.addEventListener('beforeinstallprompt',e=>{
   setTimeout(()=>{if(bar.parentElement)bar.remove();},8000);
 });
 
-// ── Ajustar story para tela no mobile ─────────────────────────
-function fitStoryMobile(){
-  if(window.innerWidth>768)return;
+// ── Escalar story via CSS transform no mobile ─────────────────
+function scaleSt(){
   const ca=document.getElementById('ca');
   const story=document.getElementById('story');
   if(!ca||!story)return;
+
+  if(window.innerWidth>768){
+    // Desktop: remover transform, restaurar tamanho nativo
+    story.style.transform='';
+    story.style.marginTop='';
+    story.style.marginBottom='';
+    if(typeof applyScales==='function')applyScales();
+    return;
+  }
+
+  // Mobile: calcular escala mantendo proporção
   const fmt=(typeof G!=='undefined'&&G.fmt)?G.fmt:'story';
   const FMT2={story:{pw:390,ph:693},feed:{pw:390,ph:488},sq:{pw:390,ph:390}};
   const f=FMT2[fmt]||FMT2.story;
-  const availW=ca.offsetWidth-16;
-  const availH=ca.offsetHeight-16;
+
+  // Espaço disponível (descontar padding=8px de cada lado)
+  const availW=ca.clientWidth-16;
+  const availH=ca.clientHeight-16;
+
   const scaleW=availW/f.pw;
   const scaleH=availH/f.ph;
-  const scale=Math.min(scaleW,scaleH,1);
-  story.style.width=(f.pw*scale)+'px';
-  story.style.height=(f.ph*scale)+'px';
+  const scale=Math.min(scaleW,scaleH,1); // nunca ampliar além do nativo
+
+  // Aplicar transformação — mantém dimensões internas intactas
+  story.style.width=f.pw+'px';
+  story.style.height=f.ph+'px';
+  story.style.transform='scale('+scale+')';
+  story.style.transformOrigin='top center';
+
+  // Compensar espaço extra causado pelo scale (margens negativas)
+  const excess=(f.ph*(1-scale))/2;
+  story.style.marginTop=(-excess)+'px';
+  story.style.marginBottom=(-excess)+'px';
+
   if(typeof applyScales==='function')applyScales();
 }
-window.addEventListener('resize',fitStoryMobile);
-window.addEventListener('orientationchange',()=>setTimeout(fitStoryMobile,300));
-document.addEventListener('DOMContentLoaded',()=>setTimeout(fitStoryMobile,200));
+
+// ── Toggle sidebar mobile (hamburger) ──────────────────────────
+function toggleSidebar(){
+  const sb=document.getElementById('sb');
+  const ov=document.getElementById('sb-overlay');
+  const btn=document.getElementById('menu-toggle');
+  if(!sb)return;
+  const isOpen=sb.classList.contains('open');
+  if(isOpen){
+    sb.classList.remove('open');
+    ov.classList.remove('on');
+    btn.innerHTML='&#9776;';
+    btn.setAttribute('aria-label','Abrir menu');
+  }else{
+    sb.classList.add('open');
+    ov.classList.add('on');
+    btn.innerHTML='&#10005;';
+    btn.setAttribute('aria-label','Fechar menu');
+  }
+}
+function closeSidebar(){
+  const sb=document.getElementById('sb');
+  const ov=document.getElementById('sb-overlay');
+  const btn=document.getElementById('menu-toggle');
+  if(!sb)return;
+  sb.classList.remove('open');
+  if(ov)ov.classList.remove('on');
+  if(btn){btn.innerHTML='&#9776;';btn.setAttribute('aria-label','Abrir menu');}
+}
+
+// Fechar sidebar ao pressionar Escape
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+
+window.addEventListener('resize',()=>{
+  scaleSt();
+  // Em desktop, fechar drawer se estiver aberto
+  if(window.innerWidth>768)closeSidebar();
+});
+window.addEventListener('orientationchange',()=>setTimeout(scaleSt,350));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(scaleSt,200));
 </script>
 </body>
 </html>
